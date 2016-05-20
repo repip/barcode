@@ -34,8 +34,8 @@ public class MySqlAccess {
 
             Class.forName("com.mysql.jdbc.Driver");
             connect = DriverManager
-                    .getConnection("jdbc:mysql://192.168.0.12/matrixintranet?"
-                            + "user=root&password=kaliffo");
+                    .getConnection("jdbc:mysql://192.168.0.12/DB?"
+                            + "user=user&password=passw");
             statement = connect.createStatement();
 
         } catch (ClassNotFoundException ex) {
