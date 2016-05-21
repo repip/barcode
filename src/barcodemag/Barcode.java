@@ -18,15 +18,15 @@ import java.util.logging.Logger;
  * @author F
  */
 public class Barcode extends javax.swing.JFrame {
-    
+
     public String server = "";
     public String db = "";
     public String usr = "";
     public String pwd = "";
-    
+
     public CampiDB aggSigillo;
     public String DbAct = "";
-            
+
     public static MySqlAccess dao;
 
     /**
@@ -38,23 +38,7 @@ public class Barcode extends javax.swing.JFrame {
      */
     public Barcode() {
         initComponents();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader("c://barcode//cfg.txt"));
-            labn.setText(br.readLine());
-            server = br.readLine();
-            db = br.readLine();
-            usr = br.readLine();
-            pwd = br.readLine();
-            in.close();
-        } catch (Exception e) {//Catch exception if any
-            System.err.println("Error: " + e.getMessage());
-        } finally {
-            try {
-                in.close();
-            } catch (IOException ex) {
-                Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        readConfig();
         lsig.setVisible(false);
         lqta.setVisible(false);
         tqta.setVisible(false);
@@ -208,36 +192,50 @@ public class Barcode extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void bcodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bcodeActionPerformed
-        
         String id = bcode.getText();
         bcode.setText("");
         if ("S".equals(id.substring(0, 1))) {
             id = id.substring(1);
             try {
-                trattaSigillo(id);
+                CampiDB campi = dao.leggiSigillo(id);
+                if (campi.isCk()) {
+                    compilaCampi(campi);
+                    if (campi.getQta() > 0) {
+                        lsig.setOpaque(false);
+                        inputQta("Inserire qta prelevata");
+                        aggSigillo = campi;
+                        DbAct = "update";
+                    } else {
+                        lsig.setOpaque(true);
+                    }
+                }
             } catch (SQLException ex) {
                 Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             try {
-                creaSigillo(id);
+                CampiDB campi = dao.cscDecode(id);
+                compilaCampi(campi);
+                inputQta("Inserire qta sigillo");
+                aggSigillo = campi;
+                DbAct = "insert";
             } catch (SQLException ex) {
                 Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
+
 
     }//GEN-LAST:event_bcodeActionPerformed
 
     private void tqtaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tqtaActionPerformed
         // TODO add your handling code here:
         if (DbAct.equals("insert")) {
-            System.out.println("insert: "+aggSigillo.getId());
+            System.out.println("insert: " + aggSigillo.getId());
         } else if (DbAct.equals("update")) {
-            System.out.println("update: "+aggSigillo.getId());
-            
+            System.out.println("update: " + aggSigillo.getId());
+
         }
-        
+
     }//GEN-LAST:event_tqtaActionPerformed
 
     /**
@@ -274,40 +272,16 @@ public class Barcode extends javax.swing.JFrame {
             }
         });
     }
-    
-    public void trattaSigillo(String id) throws SQLException {
-        
-        CampiDB campi = dao.leggiSigillo(id);
-        if (campi.isCk()) {
-            compilaCampi(campi);
-            if (campi.getQta() > 0) {
-                lsig.setOpaque(false);
-                inputQta("Inserire qta prelevata");
-                aggSigillo = campi;
-                DbAct = "update";
-            } else {
-                lsig.setOpaque(true);
-            }
-        }
-    }
-    
-    public void creaSigillo(String id) throws SQLException {
-        CampiDB campi = dao.creaSigillo(id);
-        compilaCampi(campi);
-        inputQta("Inserire qta sigillo");
-        aggSigillo = campi;
-        DbAct = "insert";
-    }
-    
-    public void compilaCampi(CampiDB campi) {
+
+    private void compilaCampi(CampiDB campi) {
         lcod.setText(campi.getCod());
         ldes.setText(campi.getDes());
         llot.setText("Lotto: " + campi.getLotto());
         lsig.setVisible(true);
         lsig.setText(Integer.toString(campi.getQta()));
     }
-    
-    public void inputQta(String msg) {
+
+    private void inputQta(String msg) {
         lqta.setText(msg);
         bcode.setVisible(false);
         lqta.setVisible(true);
@@ -315,6 +289,26 @@ public class Barcode extends javax.swing.JFrame {
         tqta.requestFocus();
     }
 
+    private void readConfig(){
+                try {
+            BufferedReader br = new BufferedReader(new FileReader("c://barcode//cfg.txt"));
+            labn.setText(br.readLine());
+            server = br.readLine();
+            db = br.readLine();
+            usr = br.readLine();
+            pwd = br.readLine();
+            in.close();
+        } catch (Exception e) {//Catch exception if any
+            System.err.println("Error: " + e.getMessage());
+        } finally {
+            try {
+                in.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField bcode;
     private javax.swing.JLabel jLabel1;

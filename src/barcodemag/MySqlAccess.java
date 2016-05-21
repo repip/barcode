@@ -61,15 +61,7 @@ public class MySqlAccess {
         return campi;
     }
 
-    public CampiDB creaSigillo(String id) throws SQLException {
-        
-        CampiDB campi = new CampiDB();
-        campi = cscDecode(id);
-        return campi;
-
-    }
-
-    private CampiDB cscDecode(String id) throws SQLException {
+    public CampiDB cscDecode(String id) throws SQLException {
         CampiDB campi = new CampiDB();
         if ("P".equals(id.substring(0, 1))) {
             id = id.substring(1);
