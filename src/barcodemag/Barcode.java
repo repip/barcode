@@ -5,11 +5,13 @@
  */
 package barcodemag;
 
-import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import static java.lang.System.in;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -17,15 +19,46 @@ import javax.swing.JOptionPane;
  */
 public class Barcode extends javax.swing.JFrame {
 
+    public String server = "";
+    public String db = "";
+    public String usr = "";
+    public String pwd = "";
+
     public static MySqlAccess dao;
 
     /**
      * Creates new form Barcode
      */
+ 
+    /***
+     * File parametri c:\barcode\cfg.txt:
+     * LABEL
+     * server
+     * database
+     * user
+     * password
+     */
     public Barcode() {
         initComponents();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("c://barcode//cfg.txt"));
+            labn.setText(br.readLine());
+            server = br.readLine();
+            db = br.readLine();
+            usr = br.readLine();
+            pwd = br.readLine();
+            in.close();
+        } catch (Exception e) {//Catch exception if any
+            System.err.println("Error: " + e.getMessage());
+        } finally {
+            try {
+                in.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         lsig.setVisible(false);
-        dao = new MySqlAccess();
+        dao = new MySqlAccess(server, db, usr, pwd);
     }
 
     /**
@@ -45,6 +78,7 @@ public class Barcode extends javax.swing.JFrame {
         llot = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        labn = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -113,6 +147,9 @@ public class Barcode extends javax.swing.JFrame {
 
         jLabel2.setFont(new java.awt.Font("Swis721 Blk BT", 2, 24)); // NOI18N
 
+        labn.setFont(new java.awt.Font("Tahoma", 3, 18)); // NOI18N
+        labn.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -120,14 +157,14 @@ public class Barcode extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 135, Short.MAX_VALUE)
                         .addComponent(jLabel2)
-                        .addGap(21, 21, 21))))
+                        .addGap(14, 14, 14)
+                        .addComponent(labn, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -135,10 +172,11 @@ public class Barcode extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
+                    .addComponent(jLabel2)
+                    .addComponent(labn, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(60, Short.MAX_VALUE))
+                .addGap(60, 60, 60))
         );
 
         pack();
@@ -223,8 +261,8 @@ public class Barcode extends javax.swing.JFrame {
     }
 
     public String creaSigillo(String id) throws SQLException {
-        int qta = Integer.parseInt(JOptionPane.showInputDialog("Creazione Sigillo\nInserire QTA"));
-        dao.creaSigillo(id, qta);
+
+        dao.creaSigillo(id);
         return "";
     }
 
@@ -233,6 +271,7 @@ public class Barcode extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel labn;
     private javax.swing.JLabel lcod;
     private javax.swing.JLabel ldes;
     private javax.swing.JLabel llot;
