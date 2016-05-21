@@ -112,7 +112,6 @@ public class Barcode extends javax.swing.JFrame {
         jLabel1.setText("Stampa Etichette [SIGILLO]");
 
         jLabel2.setFont(new java.awt.Font("Swis721 Blk BT", 2, 24)); // NOI18N
-        jLabel2.setText("MATRIX");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -139,7 +138,7 @@ public class Barcode extends javax.swing.JFrame {
                     .addComponent(jLabel2))
                 .addGap(18, 18, 18)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(57, Short.MAX_VALUE))
+                .addContainerGap(60, Short.MAX_VALUE))
         );
 
         pack();
