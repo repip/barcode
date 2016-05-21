@@ -56,20 +56,16 @@ public class MySqlAccess {
             campi.setCod(resultSet.getString("COD"));
             campi.setDes(resultSet.getString("DES"));
             campi.setLotto(resultSet.getString("lotto"));
+            campi.setCk(true);
         }
         return campi;
     }
 
-    public String creaSigillo(String id) throws SQLException {
+    public CampiDB creaSigillo(String id) throws SQLException {
+        
         CampiDB campi = new CampiDB();
         campi = cscDecode(id);
-        System.out.println(campi.isCk()
-                + " " + campi.getCod() + " " + campi.getDes() + " " + campi.getLotto());
-        if (campi.isCk()) {
-            int qta = Integer.parseInt(JOptionPane.showInputDialog("Creazione Sigillo\nInserire QTA"));
-        }
-
-        return "";
+        return campi;
 
     }
 
@@ -94,9 +90,7 @@ public class MySqlAccess {
                 campi.setLotto(resultSet.getString("CDLTY9"));
                 campi.setCk(true);
             }
-            if (resultSet.first() == true) {
-
-            } else {
+            if (!campi.isCk()) {
                 resultSet = statement
                         .executeQuery("SELECT ID, REP, ORDINE, lotto, DATA, COD, DES FROM VERSPRD WHERE ORDINE='" + id + "'");
                 while (resultSet.next()) {
