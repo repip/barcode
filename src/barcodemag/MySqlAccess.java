@@ -63,6 +63,7 @@ public class MySqlAccess {
 
     public CampiDB cscDecode(String id) throws SQLException {
         CampiDB campi = new CampiDB();
+        campi.setCsc(id);
         if ("P".equals(id.substring(0, 1))) {
             id = id.substring(1);
             resultSet = statement
@@ -86,6 +87,7 @@ public class MySqlAccess {
                 resultSet = statement
                         .executeQuery("SELECT ID, REP, ORDINE, lotto, DATA, COD, DES FROM VERSPRD WHERE ORDINE='" + id + "'");
                 while (resultSet.next()) {
+                    campi.setCsc("P"+Integer.toString(resultSet.getInt("ID")));
                     campi.setCod(resultSet.getString("COD"));
                     campi.setDes(resultSet.getString("DES"));
                     campi.setLotto(resultSet.getString("lotto"));
@@ -96,6 +98,21 @@ public class MySqlAccess {
 
         }
         return campi;
+    }
+
+    public void creaSigillo(CampiDB campi, int qta) throws SQLException {
+        preparedStatement = connect
+                .prepareStatement("INSERT INTO SIGILLI (CSC, QTA) VALUES (?,?)");
+        preparedStatement.setString(1, campi.getCsc());
+        preparedStatement.setInt(2, qta);
+        preparedStatement.executeUpdate();
+        resultSet = statement
+                .executeQuery("SELECT ID FROM SIGILLI WHERE ID=LAST_INSERT_ID() AND CSC='" + campi.getCsc()+ "'");
+        campi.setCk(false);
+        while (resultSet.next()) {
+            campi.setId(resultSet.getInt("ID"));
+            campi.setCk(true);
+        }
     }
 
     // You need to close the resultSet

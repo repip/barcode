@@ -12,7 +12,7 @@ package barcodemag;
 public class CampiDB {
 
     private int id = 0;
-    private String ordine = "";
+    private String csc = "";
     private String cod = "";
     private String des = "";
     private int qta = 0;
@@ -27,12 +27,12 @@ public class CampiDB {
         this.id = id;
     }
 
-    public String getOrdine() {
-        return ordine;
+    public String getCsc() {
+        return csc;
     }
 
-    public void setOrdine(String ordine) {
-        this.ordine = ordine;
+    public void setCsc(String ordine) {
+        this.csc = ordine;
     }
 
     public String getCod() {

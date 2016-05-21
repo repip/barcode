@@ -197,28 +197,19 @@ public class Barcode extends javax.swing.JFrame {
         if ("S".equals(id.substring(0, 1))) {
             id = id.substring(1);
             try {
-                CampiDB campi = dao.leggiSigillo(id);
-                if (campi.isCk()) {
-                    compilaCampi(campi);
-                    if (campi.getQta() > 0) {
-                        lsig.setOpaque(false);
-                        inputQta("Inserire qta prelevata");
-                        aggSigillo = campi;
-                        DbAct = "update";
-                    } else {
-                        lsig.setOpaque(true);
-                    }
-                }
+                leggiSigillo(id);
             } catch (SQLException ex) {
                 Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             try {
                 CampiDB campi = dao.cscDecode(id);
-                compilaCampi(campi);
-                inputQta("Inserire qta sigillo");
-                aggSigillo = campi;
-                DbAct = "insert";
+                if (campi.isCk()) {
+                    compilaCampi(campi);
+                    inputQta("Inserire qta sigillo");
+                    aggSigillo = campi;
+                    DbAct = "ins";
+                }
             } catch (SQLException ex) {
                 Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -229,10 +220,19 @@ public class Barcode extends javax.swing.JFrame {
 
     private void tqtaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tqtaActionPerformed
         // TODO add your handling code here:
-        if (DbAct.equals("insert")) {
-            System.out.println("insert: " + aggSigillo.getId());
-        } else if (DbAct.equals("update")) {
-            System.out.println("update: " + aggSigillo.getId());
+        if (DbAct.equals("ins")) {
+            try {
+                dao.creaSigillo(aggSigillo, Integer.parseInt(tqta.getText()));
+                if (aggSigillo.isCk()) {
+                    leggiSigillo(Integer.toString(aggSigillo.getId()));
+                    tqta.setText("");
+                    tqta.requestFocus();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (DbAct.equals("upd")) {
+            System.out.println("upd: " + aggSigillo.getId());
 
         }
 
@@ -273,6 +273,21 @@ public class Barcode extends javax.swing.JFrame {
         });
     }
 
+    private void leggiSigillo(String id) throws SQLException {
+        CampiDB campi = dao.leggiSigillo(id);
+        if (campi.isCk()) {
+            compilaCampi(campi);
+            if (campi.getQta() > 0) {
+                lsig.setOpaque(false);
+                inputQta("Inserire qta prelevata");
+                aggSigillo = campi;
+                DbAct = "upd";
+            } else {
+                lsig.setOpaque(true);
+            }
+        }
+    }
+
     private void compilaCampi(CampiDB campi) {
         lcod.setText(campi.getCod());
         ldes.setText(campi.getDes());
@@ -289,8 +304,8 @@ public class Barcode extends javax.swing.JFrame {
         tqta.requestFocus();
     }
 
-    private void readConfig(){
-                try {
+    private void readConfig() {
+        try {
             BufferedReader br = new BufferedReader(new FileReader("c://barcode//cfg.txt"));
             labn.setText(br.readLine());
             server = br.readLine();
@@ -308,7 +323,7 @@ public class Barcode extends javax.swing.JFrame {
             }
         }
     }
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField bcode;
     private javax.swing.JLabel jLabel1;
