@@ -28,9 +28,7 @@ public class MySqlAccess {
     private ResultSet resultSet = null;
 
     public MySqlAccess(String server, String db, String usr, String pwd) {
-
         try {
-
             Class.forName("com.mysql.jdbc.Driver");
             connect = DriverManager
                     .getConnection("jdbc:mysql://" + server + "/" + db + "?user=" + usr + "&password=" + pwd);
