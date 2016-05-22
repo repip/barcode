@@ -44,6 +44,7 @@ public class Barcode extends javax.swing.JFrame {
         lsig.setVisible(false);
         lqta.setVisible(false);
         tqta.setVisible(false);
+        llog.setText("<html><table cellpadding=\"5\" cellspacing=\"0\">");
         dao = new MySqlAccess(server, db, usr, pwd);
     }
 
@@ -67,6 +68,7 @@ public class Barcode extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         labn = new javax.swing.JLabel();
+        llog = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Stampa Etichette");
@@ -123,7 +125,7 @@ public class Barcode extends javax.swing.JFrame {
                         .addGap(23, 23, 23)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(lqta, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(lqta, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
                                 .addGap(10, 10, 10)
                                 .addComponent(tqta, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(132, 132, 132))
@@ -161,6 +163,10 @@ public class Barcode extends javax.swing.JFrame {
         labn.setFont(new java.awt.Font("Tahoma", 3, 18)); // NOI18N
         labn.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
+        llog.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        llog.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        llog.setAutoscrolls(true);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -174,7 +180,8 @@ public class Barcode extends javax.swing.JFrame {
                         .addComponent(jLabel2)
                         .addGap(14, 14, 14)
                         .addComponent(labn, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(llog, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -188,7 +195,9 @@ public class Barcode extends javax.swing.JFrame {
                         .addComponent(jLabel2)))
                 .addGap(18, 18, 18)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(50, 50, 50))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(llog, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -237,6 +246,7 @@ public class Barcode extends javax.swing.JFrame {
             } else if (DbAct.equals("upd")) {
                 try {
                     dao.updtSigillo(aggSigillo, Integer.parseInt(tqta.getText()));
+                    llog.setText(logUpdt(aggSigillo, Integer.parseInt(tqta.getText())));
                     resetForm();
                 } catch (SQLException ex) {
                     Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
@@ -348,6 +358,17 @@ public class Barcode extends javax.swing.JFrame {
         }
     }
 
+    private String logUpdt(CampiDB campi, int qta) {
+        String txtlog = llog.getText();
+        txtlog += "<tr>";
+        txtlog += "<td>" + campi.getCod() + "</td>";
+        txtlog += "<td>" + campi.getDes() + "</td>";
+        txtlog += "<td>Lotto: " + campi.getLotto() + "</td>";
+        txtlog += "<td>Qta: " + qta + "</td>";
+        txtlog += "</tr>";
+        return txtlog;
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField bcode;
     private javax.swing.JLabel jLabel1;
@@ -356,6 +377,7 @@ public class Barcode extends javax.swing.JFrame {
     private javax.swing.JLabel labn;
     private javax.swing.JLabel lcod;
     private javax.swing.JLabel ldes;
+    private javax.swing.JLabel llog;
     private javax.swing.JLabel llot;
     private javax.swing.JLabel lqta;
     private javax.swing.JLabel lsig;
