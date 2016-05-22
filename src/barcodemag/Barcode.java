@@ -5,6 +5,7 @@
  */
 package barcodemag;
 
+import java.awt.Color;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -173,7 +174,7 @@ public class Barcode extends javax.swing.JFrame {
                         .addComponent(jLabel2)
                         .addGap(14, 14, 14)
                         .addComponent(labn, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -207,6 +208,7 @@ public class Barcode extends javax.swing.JFrame {
             try {
                 CampiDB campi = dao.cscDecode(id);
                 if (campi.isCk()) {
+                    tqta.setBackground(Color.YELLOW);
                     compilaCampi(campi);
                     inputQta("Inserire qta sigillo");
                     aggSigillo = campi;
@@ -222,22 +224,25 @@ public class Barcode extends javax.swing.JFrame {
 
     private void tqtaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tqtaActionPerformed
         // TODO add your handling code here:
-        if (DbAct.equals("ins")) {
-            try {
-                dao.creaSigillo(aggSigillo, Integer.parseInt(tqta.getText()));
-                if (aggSigillo.isCk()) {
+        if (aggSigillo.isCk()) {
+            if (DbAct.equals("ins")) {
+                try {
+                    dao.creaSigillo(aggSigillo, Integer.parseInt(tqta.getText()));
                     leggiSigillo(Integer.toString(aggSigillo.getId()));
                     tqta.setText("");
                     tqta.requestFocus();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } catch (SQLException ex) {
-                Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
+            } else if (DbAct.equals("upd")) {
+                try {
+                    dao.updtSigillo(aggSigillo, Integer.parseInt(tqta.getText()));
+                    resetForm();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
-        } else if (DbAct.equals("upd")) {
-            System.out.println("upd: " + aggSigillo.getId());
-
         }
-
     }//GEN-LAST:event_tqtaActionPerformed
 
     /**
@@ -278,6 +283,7 @@ public class Barcode extends javax.swing.JFrame {
     private void leggiSigillo(String id) throws SQLException {
         CampiDB campi = dao.leggiSigillo(id);
         if (campi.isCk()) {
+            tqta.setBackground(Color.WHITE);
             compilaCampi(campi);
             if (campi.getQta() > 0) {
                 lsig.setOpaque(false);
@@ -304,6 +310,21 @@ public class Barcode extends javax.swing.JFrame {
         lqta.setVisible(true);
         tqta.setVisible(true);
         tqta.requestFocus();
+    }
+
+    private void resetForm() {
+        lcod.setText("");
+        ldes.setText("");
+        lsig.setText("");
+        lsig.setVisible(false);
+        llot.setText("");
+        lqta.setText("");
+        lqta.setVisible(false);
+        tqta.setText("");
+        tqta.setVisible(false);
+        bcode.setText("");
+        bcode.setVisible(true);
+        bcode.requestFocus();
     }
 
     private void readConfig() {

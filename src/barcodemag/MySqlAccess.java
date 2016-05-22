@@ -63,31 +63,32 @@ public class MySqlAccess {
 
     public CampiDB cscDecode(String id) throws SQLException {
         CampiDB campi = new CampiDB();
-        campi.setCsc(id);
         if ("P".equals(id.substring(0, 1))) {
             id = id.substring(1);
             resultSet = statement
-                    .executeQuery("SELECT REP, ORDINE, lotto, DATA, COD, DES FROM VERSPRD WHERE ID=" + id);
+                    .executeQuery("SELECT COD, DES, lotto FROM VERSPRD WHERE ID=" + id);
             while (resultSet.next()) {
                 campi.setCod(resultSet.getString("COD"));
                 campi.setDes(resultSet.getString("DES"));
                 campi.setLotto(resultSet.getString("lotto"));
+                campi.setCsc("P"+id);
                 campi.setCk(true);
             }
         } else {
             resultSet = statement
-                    .executeQuery("SELECT CDCFY9, ORDIY9, CDLTY9, DTARY9, CDARY9, DSARY9 FROM YYCSC99F WHERE NRSEY9=" + id);
+                    .executeQuery("SELECT CDARY9, DSARY9, CDLTY9 FROM YYCSC99F WHERE NRSEY9=" + id);
             while (resultSet.next()) {
                 campi.setCod(resultSet.getString("CDARY9"));
                 campi.setDes(resultSet.getString("DSARY9"));
                 campi.setLotto(resultSet.getString("CDLTY9"));
+                campi.setCsc(id);
                 campi.setCk(true);
             }
             if (!campi.isCk()) {
                 resultSet = statement
-                        .executeQuery("SELECT ID, REP, ORDINE, lotto, DATA, COD, DES FROM VERSPRD WHERE ORDINE='" + id + "'");
+                        .executeQuery("SELECT ID, COD, DES, lotto FROM VERSPRD WHERE ORDINE='" + id + "'");
                 while (resultSet.next()) {
-                    campi.setCsc("P"+Integer.toString(resultSet.getInt("ID")));
+                    campi.setCsc("P" + Integer.toString(resultSet.getInt("ID")));
                     campi.setCod(resultSet.getString("COD"));
                     campi.setDes(resultSet.getString("DES"));
                     campi.setLotto(resultSet.getString("lotto"));
@@ -107,12 +108,45 @@ public class MySqlAccess {
         preparedStatement.setInt(2, qta);
         preparedStatement.executeUpdate();
         resultSet = statement
-                .executeQuery("SELECT ID FROM SIGILLI WHERE ID=LAST_INSERT_ID() AND CSC='" + campi.getCsc()+ "'");
+                .executeQuery("SELECT ID FROM SIGILLI WHERE ID=LAST_INSERT_ID() AND CSC='" + campi.getCsc() + "'");
         campi.setCk(false);
         while (resultSet.next()) {
             campi.setId(resultSet.getInt("ID"));
             campi.setCk(true);
         }
+    }
+
+    /**
+     *
+     * @param campi
+     * @param qta
+     * @throws SQLException
+     *
+     * New db table CREATE TABLE IF NOT EXISTS `SIGILLIMOV` ( `ID` int(11) NOT
+     * NULL, `SIG` int(10) NOT NULL, `COD` varchar(20) NOT NULL, `DES`
+     * varchar(40) NOT NULL, `LOT` varchar(30) NOT NULL, `OLDQTA` int(11) NOT
+     * NULL, `QTAPRE` int(11) NOT NULL, `NEWQTA` int(11) NOT NULL, `DT`
+     * timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+     * ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+     *
+     */
+    public void updtSigillo(CampiDB campi, int qta) throws SQLException {
+        preparedStatement = connect
+                .prepareStatement("UPDATE SIGILLI SET QTA=? WHERE ID=?");
+        preparedStatement.setInt(1, campi.getQta() - qta);
+        preparedStatement.setInt(2, campi.getId());
+        preparedStatement.executeUpdate();
+        preparedStatement = connect
+                .prepareStatement("INSERT INTO SIGILLIMOV (SIG, COD, DES, LOT, OLDQTA, QTAPRE, NEWQTA) VALUES(?, ?, ?, ?, ?, ?, ?)");
+        preparedStatement.setInt(1, campi.getId());
+        preparedStatement.setString(2, campi.getCod());
+        preparedStatement.setString(3, campi.getDes());
+        preparedStatement.setString(4, campi.getLotto());
+        preparedStatement.setInt(5, campi.getQta());
+        preparedStatement.setInt(6, qta);
+        preparedStatement.setInt(7, campi.getQta() - qta);
+        preparedStatement.executeUpdate();
+        //System.out.println(preparedStatement.toString());
     }
 
     // You need to close the resultSet
