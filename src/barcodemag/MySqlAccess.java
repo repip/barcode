@@ -45,13 +45,14 @@ public class MySqlAccess {
         String qta = "";
         CampiDB campi = new CampiDB();
         resultSet = statement
-                .executeQuery("select * from SigilliLt where ID=" + id);
+                .executeQuery("select ID, CSC, COD, DES, lotto, QTA from SigilliLt where ID=" + id);
         while (resultSet.next()) {
             campi.setId(resultSet.getInt("ID"));
-            campi.setQta(resultSet.getInt("QTA"));
+            campi.setCsc(resultSet.getString("CSC"));
             campi.setCod(resultSet.getString("COD"));
             campi.setDes(resultSet.getString("DES"));
             campi.setLotto(resultSet.getString("lotto"));
+            campi.setQta(resultSet.getInt("QTA"));
             campi.setCk(true);
         }
         return campi;

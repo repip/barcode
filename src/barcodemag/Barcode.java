@@ -10,7 +10,10 @@ import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import static java.lang.System.in;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +28,7 @@ public class Barcode extends javax.swing.JFrame {
     public String db = "";
     public String usr = "";
     public String pwd = "";
+    public String prt = "";
 
     public CampiDB aggSigillo;
     public String DbAct = "";
@@ -37,6 +41,7 @@ public class Barcode extends javax.swing.JFrame {
     /**
      * *
      * File parametri c:\barcode\cfg.txt: LABEL server database user password
+     * prt
      */
     public Barcode() {
         initComponents();
@@ -44,7 +49,7 @@ public class Barcode extends javax.swing.JFrame {
         lsig.setVisible(false);
         lqta.setVisible(false);
         tqta.setVisible(false);
-        llog.setText("<html><table cellpadding=\"5\" cellspacing=\"0\">");
+        llog.setText("<html><table cellpadding=\"0\" cellspacing=\"0\">");
         dao = new MySqlAccess(server, db, usr, pwd);
     }
 
@@ -245,10 +250,8 @@ public class Barcode extends javax.swing.JFrame {
                 }
             } else if (DbAct.equals("upd")) {
                 try {
-                    dao.updtSigillo(aggSigillo, Integer.parseInt(tqta.getText()));
-                    llog.setText(logUpdt(aggSigillo, Integer.parseInt(tqta.getText())));
-                    resetForm();
-                } catch (SQLException ex) {
+                    doUpdt();
+                } catch (Exception ex) {
                     Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -306,6 +309,14 @@ public class Barcode extends javax.swing.JFrame {
         }
     }
 
+    private void doUpdt() throws Exception {
+        int qtap = Integer.parseInt(tqta.getText());
+        dao.updtSigillo(aggSigillo, qtap);
+        printZebra(aggSigillo.getId(), qtap);
+        llog.setText(logUpdt(aggSigillo, qtap));
+        resetForm();
+    }
+
     private void compilaCampi(CampiDB campi) {
         lcod.setText(campi.getCod());
         ldes.setText(campi.getDes());
@@ -346,6 +357,7 @@ public class Barcode extends javax.swing.JFrame {
             db = br.readLine();
             usr = br.readLine();
             pwd = br.readLine();
+            prt = br.readLine();
             in.close();
         } catch (Exception e) {//Catch exception if any
             System.err.println("Error: " + e.getMessage());
@@ -361,12 +373,26 @@ public class Barcode extends javax.swing.JFrame {
     private String logUpdt(CampiDB campi, int qta) {
         String txtlog = llog.getText();
         txtlog += "<tr>";
-        txtlog += "<td>" + campi.getCod() + "</td>";
-        txtlog += "<td>" + campi.getDes() + "</td>";
-        txtlog += "<td>Lotto: " + campi.getLotto() + "</td>";
-        txtlog += "<td>Qta: " + qta + "</td>";
+        txtlog += "<td>" + campi.getCod() + "&nbsp;</td>";
+        txtlog += "<td>" + campi.getDes() + "&nbsp;</td>";
+        txtlog += "<td>Lotto:" + campi.getLotto() + "&nbsp;</td>";
+        txtlog += "<td>Qta:" + qta + "&nbsp;</td>";
         txtlog += "</tr>";
         return txtlog;
+    }
+
+    private void printZebra(int sig, int qtap) throws Exception {
+        URL server = new URL("http://" + this.server + "/" + this.db + "/lot/barcodemag.php?prt=" + this.prt
+                + "&sig=" + sig
+                + "&qtap=" + qtap);
+        URLConnection yc = server.openConnection();
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+                yc.getInputStream()));
+        String inputLine;
+        while ((inputLine = in.readLine()) != null) {
+            System.out.println(inputLine + "\n");
+        }
+        in.close();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
