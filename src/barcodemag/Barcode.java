@@ -17,6 +17,9 @@ import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 
 /**
  *
@@ -35,6 +38,10 @@ public class Barcode extends javax.swing.JFrame {
 
     public static MySqlAccess dao;
 
+    private Object[][] logResults;
+    public DefaultTableModel defaultTableModellog;
+    public Object[] columnslog;
+
     /**
      * Creates new form Barcode
      */
@@ -49,8 +56,14 @@ public class Barcode extends javax.swing.JFrame {
         lsig.setVisible(false);
         lqta.setVisible(false);
         tqta.setVisible(false);
-        llog.setText("<html><table cellpadding=\"0\" cellspacing=\"0\">");
+        tannulla.setVisible(false);
+        columnslog = new Object[]{"Codice", "Descrizione", "Lotto", "Qta"};
+        defaultTableModellog = new DefaultTableModel(logResults, columnslog);
         dao = new MySqlAccess(server, db, usr, pwd);
+        jTable1.setModel(dao.defaultTableModel);
+        jTable2.setModel(defaultTableModellog);
+        setColumnWidths(jTable1, dao.columns, 7, 10, 180, 20);
+        setColumnWidths(jTable2, dao.columns, 7, 180, 10, 20);
     }
 
     /**
@@ -70,13 +83,19 @@ public class Barcode extends javax.swing.JFrame {
         llot = new javax.swing.JLabel();
         tqta = new javax.swing.JTextField();
         lqta = new javax.swing.JLabel();
+        tannulla = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         labn = new javax.swing.JLabel();
-        llog = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        tsrc = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Stampa Etichette");
+        setResizable(false);
 
         jPanel1.setBackground(new java.awt.Color(153, 255, 204));
 
@@ -114,6 +133,13 @@ public class Barcode extends javax.swing.JFrame {
         lqta.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lqta.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
 
+        tannulla.setText("Annulla");
+        tannulla.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tannullaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -130,10 +156,11 @@ public class Barcode extends javax.swing.JFrame {
                         .addGap(23, 23, 23)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(lqta, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
-                                .addGap(10, 10, 10)
+                                .addComponent(lqta, javax.swing.GroupLayout.DEFAULT_SIZE, 292, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(tqta, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(132, 132, 132))
+                                .addGap(47, 47, 47)
+                                .addComponent(tannulla, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(lsig, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(30, 30, 30)
@@ -156,8 +183,9 @@ public class Barcode extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(tqta, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lqta, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(47, 47, 47))
+                    .addComponent(lqta, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(tannulla, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(49, 49, 49))
         );
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
@@ -165,12 +193,46 @@ public class Barcode extends javax.swing.JFrame {
 
         jLabel2.setFont(new java.awt.Font("Swis721 Blk BT", 2, 24)); // NOI18N
 
-        labn.setFont(new java.awt.Font("Tahoma", 3, 18)); // NOI18N
+        labn.setFont(new java.awt.Font("Swis721 Blk BT", 2, 24)); // NOI18N
         labn.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
-        llog.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        llog.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
-        llog.setAutoscrolls(true);
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(jTable1);
+
+        tsrc.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        tsrc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tsrcActionPerformed(evt);
+            }
+        });
+
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane2.setViewportView(jTable2);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -185,8 +247,12 @@ public class Barcode extends javax.swing.JFrame {
                         .addComponent(jLabel2)
                         .addGap(14, 14, 14)
                         .addComponent(labn, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(llog, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(tsrc, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -200,9 +266,13 @@ public class Barcode extends javax.swing.JFrame {
                         .addComponent(jLabel2)))
                 .addGap(18, 18, 18)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(tsrc, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(llog, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
@@ -211,29 +281,7 @@ public class Barcode extends javax.swing.JFrame {
     private void bcodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bcodeActionPerformed
         String id = bcode.getText();
         bcode.setText("");
-        if ("S".equals(id.substring(0, 1))) {
-            id = id.substring(1);
-            try {
-                leggiSigillo(id);
-            } catch (SQLException ex) {
-                Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } else {
-            try {
-                CampiDB campi = dao.cscDecode(id);
-                if (campi.isCk()) {
-                    tqta.setBackground(Color.YELLOW);
-                    compilaCampi(campi);
-                    inputQta("Inserire qta sigillo");
-                    aggSigillo = campi;
-                    DbAct = "ins";
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-
+        bcode(id);
     }//GEN-LAST:event_bcodeActionPerformed
 
     private void tqtaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tqtaActionPerformed
@@ -257,6 +305,23 @@ public class Barcode extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_tqtaActionPerformed
+
+    private void tsrcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tsrcActionPerformed
+        try {
+            dao.listaLotti(tsrc.getText());
+            tsrc.setText("");
+        } catch (Exception ex) {
+            Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_tsrcActionPerformed
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+        bcode(jTable1.getValueAt(jTable1.getSelectedRow(), 0).toString());
+    }//GEN-LAST:event_jTable1MouseClicked
+
+    private void tannullaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tannullaActionPerformed
+        resetForm();
+    }//GEN-LAST:event_tannullaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -293,6 +358,32 @@ public class Barcode extends javax.swing.JFrame {
         });
     }
 
+    private void bcode(String id) {
+        dao.defaultTableModel.setRowCount(0);
+        if ("S".equals(id.substring(0, 1))) {
+            id = id.substring(1);
+            try {
+                leggiSigillo(id);
+            } catch (SQLException ex) {
+                Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            try {
+                CampiDB campi = dao.cscDecode(id);
+                if (campi.isCk()) {
+                    tqta.setBackground(Color.YELLOW);
+                    compilaCampi(campi);
+                    inputQta("Inserire qta sigillo");
+                    aggSigillo = campi;
+                    DbAct = "ins";
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }
+
     private void leggiSigillo(String id) throws SQLException {
         CampiDB campi = dao.leggiSigillo(id);
         if (campi.isCk()) {
@@ -313,7 +404,7 @@ public class Barcode extends javax.swing.JFrame {
         int qtap = Integer.parseInt(tqta.getText());
         dao.updtSigillo(aggSigillo, qtap);
         printZebra(aggSigillo.getId(), qtap);
-        llog.setText(logUpdt(aggSigillo, qtap));
+        logUpdt(aggSigillo, qtap);
         resetForm();
     }
 
@@ -331,6 +422,7 @@ public class Barcode extends javax.swing.JFrame {
         lqta.setVisible(true);
         tqta.setVisible(true);
         tqta.requestFocus();
+        tannulla.setVisible(true);
     }
 
     private void resetForm() {
@@ -343,8 +435,10 @@ public class Barcode extends javax.swing.JFrame {
         lqta.setVisible(false);
         tqta.setText("");
         tqta.setVisible(false);
+        tannulla.setVisible(false);
         bcode.setText("");
         bcode.setVisible(true);
+        dao.defaultTableModel.setRowCount(0);
         bcode.requestFocus();
     }
 
@@ -370,15 +464,10 @@ public class Barcode extends javax.swing.JFrame {
         }
     }
 
-    private String logUpdt(CampiDB campi, int qta) {
-        String txtlog = llog.getText();
-        txtlog += "<tr>";
-        txtlog += "<td>" + campi.getCod() + "&nbsp;</td>";
-        txtlog += "<td>" + campi.getDes() + "&nbsp;</td>";
-        txtlog += "<td>Lotto:" + campi.getLotto() + "&nbsp;</td>";
-        txtlog += "<td>Qta:" + qta + "&nbsp;</td>";
-        txtlog += "</tr>";
-        return txtlog;
+    private void logUpdt(CampiDB campi, int qta) {
+        Object[] tempRow;
+        tempRow = new Object[]{campi.getCod(), campi.getDes(), campi.getLotto(), qta};
+        defaultTableModellog.addRow(tempRow);
     }
 
     private void printZebra(int sig, int qtap) throws Exception {
@@ -395,18 +484,31 @@ public class Barcode extends javax.swing.JFrame {
         in.close();
     }
 
+    private void setColumnWidths(JTable table, Object[] columns, int... widths) {
+        TableColumn column;
+        for (int i = 0; i < columns.length; i++) {
+            column = table.getColumnModel().getColumn(i);
+            column.setPreferredWidth(widths[i]);
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField bcode;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTable2;
     private javax.swing.JLabel labn;
     private javax.swing.JLabel lcod;
     private javax.swing.JLabel ldes;
-    private javax.swing.JLabel llog;
     private javax.swing.JLabel llot;
     private javax.swing.JLabel lqta;
     private javax.swing.JLabel lsig;
+    private javax.swing.JButton tannulla;
     private javax.swing.JTextField tqta;
+    private javax.swing.JTextField tsrc;
     // End of variables declaration//GEN-END:variables
 }

@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -26,14 +27,18 @@ public class MySqlAccess {
     private Statement statement = null;
     private PreparedStatement preparedStatement = null;
     private ResultSet resultSet = null;
+    private Object[][] databaseResults;
+    public DefaultTableModel defaultTableModel;
+    public Object[] columns;
 
     public MySqlAccess(String server, String db, String usr, String pwd) {
         try {
+            columns = new Object[]{"CSC", "Codice", "Descrizione", "Lotto"};
+            defaultTableModel = new DefaultTableModel(databaseResults, columns);
             Class.forName("com.mysql.jdbc.Driver");
             connect = DriverManager
                     .getConnection("jdbc:mysql://" + server + "/" + db + "?user=" + usr + "&password=" + pwd);
             statement = connect.createStatement();
-
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Barcode.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
@@ -68,7 +73,7 @@ public class MySqlAccess {
                 campi.setCod(resultSet.getString("COD"));
                 campi.setDes(resultSet.getString("DES"));
                 campi.setLotto(resultSet.getString("lotto"));
-                campi.setCsc("P"+id);
+                campi.setCsc("P" + id);
                 campi.setCk(true);
             }
         } else {
@@ -144,6 +149,20 @@ public class MySqlAccess {
         preparedStatement.setInt(7, campi.getQta() - qta);
         preparedStatement.executeUpdate();
         //System.out.println(preparedStatement.toString());
+    }
+
+    public void listaLotti(String src) throws Exception {
+        resultSet = statement
+                .executeQuery("(SELECT NRSEY9, CDARY9, DSARY9, CDLTY9 AS LT FROM YYCSC99F WHERE CDLTY9 LIKE '%" + src
+                        + "%' OR CDARY9 LIKE '%" + src + "%')"
+                        + "UNION (SELECT CONCAT('P',ID), COD, DES, lotto AS LT FROM VERSPRD WHERE lotto LIKE '%" + src
+                        + "%' OR COD LIKE '%" + src + "%') ORDER BY LT");
+        Object[] tempRow;
+        defaultTableModel.setRowCount(0);
+        while (resultSet.next()) {
+            tempRow = new Object[]{resultSet.getString(1), resultSet.getString(2), resultSet.getString(3), resultSet.getString(4)};
+            defaultTableModel.addRow(tempRow);
+        }
     }
 
     // You need to close the resultSet
