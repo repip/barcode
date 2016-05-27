@@ -371,6 +371,7 @@ public class Barcode extends javax.swing.JFrame {
             try {
                 CampiDB campi = dao.cscDecode(id);
                 if (campi.isCk()) {
+                    lsig.setOpaque(false);
                     tqta.setBackground(Color.YELLOW);
                     compilaCampi(campi);
                     inputQta("Inserire qta sigillo");
