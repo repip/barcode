@@ -7,6 +7,7 @@ package barcodemag;
 
 import java.awt.Color;
 import java.awt.Toolkit;
+import java.awt.print.PrinterJob;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -14,9 +15,15 @@ import java.io.InputStreamReader;
 import static java.lang.System.in;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.print.Doc;
+import javax.print.DocFlavor;
+import javax.print.PrintException;
+import javax.print.PrintService;
+import javax.print.SimpleDoc;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -404,7 +411,8 @@ public class Barcode extends javax.swing.JFrame {
     private void doUpdt() throws Exception {
         int qtap = Integer.parseInt(tqta.getText());
         dao.updtSigillo(aggSigillo, qtap);
-        printZebra(aggSigillo.getId(), qtap);
+        leggiSigillo(Integer.toString(aggSigillo.getId()));
+        printZebra(qtap);
         logUpdt(aggSigillo, qtap);
         resetForm();
     }
@@ -471,18 +479,80 @@ public class Barcode extends javax.swing.JFrame {
         defaultTableModellog.addRow(tempRow);
     }
 
-    private void printZebra(int sig, int qtap) throws Exception {
-        URL server = new URL("http://" + this.server + "/" + this.db + "/lot/barcodemag.php?prt=" + this.prt
-                + "&sig=" + sig
-                + "&qtap=" + qtap);
-        URLConnection yc = server.openConnection();
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-                yc.getInputStream()));
-        String inputLine;
-        while ((inputLine = in.readLine()) != null) {
-            System.out.println(inputLine + "\n");
+    private void printZebra(int qtap) throws Exception {
+        PrintService[] service = PrinterJob.lookupPrintServices(); // list of printers
+        int count = service.length;
+        boolean zebraloc = false;
+        for (int i = 0; i < count; i++) {
+            if (service[i].getName().equalsIgnoreCase(this.prt)) {
+                zebraloc = true;
+                printLabel(service[i], qtap);
+                i = count;
+            }
         }
-        in.close();
+        if (!zebraloc) {
+            System.out.println(zebraloc);
+            URL server = new URL("http://" + this.server + "/" + this.db + "/lot/barcodemag.php?prt=" + this.prt
+                    + "&sig=" + aggSigillo.getId()
+                    + "&qtap=" + qtap);
+            URLConnection yc = server.openConnection();
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    yc.getInputStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                System.out.println(inputLine + "\n");
+            }
+            in.close();
+        }
+    }
+
+    private boolean printLabel(PrintService printService, int qtap) {
+        if (printService == null) {
+            System.err.println("[Print Label] print service is invalid.");
+            return false;
+        }
+
+        String command
+                = "CT~~CD,~CC^~CT~"
+                + "^XA~TA000~JSN^LT0^MNW^MTT^PON^PMN^LH0,0^JMA^PR3,3~SD25^JUS^LRN^CI0^XZ"
+                + "~DG000.GRF,01280,020,"
+                + ",:::::::::::::::::::::N03F807F007C07FHFC7FFC03F7F07F,N03F80FE00FE0FIFCFHFE03E3F8FE,N07FC1FF01FE07FHFC7FHF07F1F8FC,N07F83FE03FE0FIFCFIF87E1F9FC,N07FC1FE03FF003F00FC1F87E0FDF8,N0HFC3FE03FE003F00F81F8FE0FHF8,N07DC7DC07DF003F00F81F87C07FF0,N0FBE7BE0FHFH03F00F83F8FE03FE0,N079C7BC07DF007F01F81F07C03FC0,N0FBEFBE0F9F803E01FHFE0FE03F80,N0F9CF7C1F9F007E01FHFC07C03FC0,N0FBFE7E3F8F807E03FHF80FE07FE0,N0F9DE7C3F0F807E01FHFE0FC07FC0,N0F9FEFC3E0F80FE03F87E0FC0FFE0,N0F1FC7C7FHF807C01F03F0FC1FHF0,M01FBFEFE7FHFC0FE03F83F0F83FBF8,M01F1F87C7FHFC07C03F07F1F87F1F8,M01F8F8F8FIFC0FE03F03E1F8FE1F8,M01F0F0F9FC07C0FC03F07E1F8FC0FC,M03F8F0FBF80FE0FE03F03F3FBFE0FE,,:::::::::::::::::::::~DG001.GRF,01024,016,"
+                + ",:::::::::::::::::::::H0FE01FC01F01FIF1FHFH0FDFC1FC,H0FE03F803F83FIF3FHF80F8FE3F8,01FF07FC07F81FIF1FHFC1FC7E3F0,01FE0FF80FF83FIF3FHFE1F87E7F0,01FF07F80FFC00FC03F07E1F83F7E0,03FF0FF80FF800FC03E07E3F83FFE0,01F71F701F7C00FC03E07E1F01FFC0,03EF9EF83FFC00FC03E0FE3F80FF80,01E71EF01F7C01FC07E07C1F00FF,03EFBEF83E7E00F807FHF83F80FE,03E73DF07E7C01F807FHF01F00FF,03EFF9F8FE3E01F80FHFE03F81FF80,03E779F0FC3E01F807FHF83F01FF,03E7FBF0F83E03F80FE1F83F03FF80,03C7F1F1FHFE01F007C0FC3F07FFC0,07EFFBF9FIF03F80FE0FC3E0FEFE0,07C7E1F1FIF01F00FC1FC7E1FC7E0,07E3E3E3FIF03F80FC0F87E3F87E0,07C3C3E7F01F03F00FC1F87E3F03F0,0FE3C3EFE03F83F80FC0FCFEFF83F8,,:::::::::::::::::::::^XA"
+                + "^MMT"
+                + "^PW751"
+                + "^LL0200"
+                + "^LS - 10"
+                + "^FT576,64^XG000.GRF,1,1^FS"
+                + "^FT224,64^XG001.GRF,1,1^FS"
+                + "^BY2,3,32^FT455,175^B3N,N,,Y,N"
+                + "^FDS" + aggSigillo.getId() + "^FS"
+                + "^BY2,3,32^FT32,175^B3N,N,,Y,N"
+                + "^FD" + aggSigillo.getCsc() + "^FS"
+                + "^FT403,44^A0N,34,33^FH\\^FD" + aggSigillo.getCod() + "^FS"
+                + "^FT403,69^A0N,28,19^FH\\^FD" + aggSigillo.getDes() + "^FS"
+                + "^FT25,44^A0N,34,33^FH\\^FD" + aggSigillo.getCod() + "^FS"
+                + "^FT517,111^A0N,39,38^FH\\^FDQta. " + aggSigillo.getQta() + "^FS"
+                + "^FT25,69^A0N,28,19^FH\\^FD" + aggSigillo.getDes() + "^FS"
+                + "^FT466,139^A0N,23,24^FH\\^FDLotto: " + aggSigillo.getLotto() + "^FS"
+                + "^FO448,74^GB250,45,2^FS"
+                + "^FT147,106^A0N,34,33^FH\\^FD" + qtap + "^FS"
+                + "^FT88,139^A0N,23,24^FH\\^FDLotto: " + aggSigillo.getLotto() + "^FS"
+                + "^PQ1,0,1,Y^XZ"
+                + "^XA^ID000.GRF^FS^XZ"
+                + "^XA^ID001.GRF^FS^XZ";
+
+        byte[] data;
+        data = command.getBytes(StandardCharsets.US_ASCII);
+        Doc doc = new SimpleDoc(data, DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
+
+        boolean result = false;
+        try {
+            printService.createPrintJob().print(doc, null);
+            result = true;
+        } catch (PrintException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     private void setColumnWidths(JTable table, Object[] columns, int... widths) {
