@@ -491,7 +491,6 @@ public class Barcode extends javax.swing.JFrame {
             }
         }
         if (!zebraloc) {
-            System.out.println(zebraloc);
             URL server = new URL("http://" + this.server + "/" + this.db + "/lot/barcodemag.php?prt=" + this.prt
                     + "&sig=" + aggSigillo.getId()
                     + "&qtap=" + qtap);
