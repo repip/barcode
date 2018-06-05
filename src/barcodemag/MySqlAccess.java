@@ -153,10 +153,10 @@ public class MySqlAccess {
 
     public void listaLotti(String src) throws Exception {
         resultSet = statement
-                .executeQuery("(SELECT NRSEY9, CDARY9, DSARY9, CDLTY9 AS LT FROM YYCSC99F WHERE CDLTY9 LIKE '%" + src
+                .executeQuery("(SELECT NRSEY9 AS ID, CDARY9, DSARY9, CDLTY9 AS LT, DTARY9 as DT FROM YYCSC99F WHERE CDLTY9 LIKE '%" + src
                         + "%' OR CDARY9 LIKE '%" + src + "%')"
-                        + "UNION (SELECT CONCAT('P',ID), COD, DES, lotto AS LT FROM VERSPRD WHERE lotto LIKE '%" + src
-                        + "%' OR COD LIKE '%" + src + "%') ORDER BY LT");
+                        + "UNION (SELECT CONCAT('P',ID) AS ID, COD, DES, lotto AS LT,cast(concat(substr(DATA,1,4), substr(DATA,6,2),substr(DATA,9,2)) AS DECIMAL)AS DT FROM VERSPRD WHERE lotto LIKE '%" + src
+                        + "%' OR COD LIKE '%" + src + "%') ORDER BY DT DESC");
         Object[] tempRow;
         defaultTableModel.setRowCount(0);
         while (resultSet.next()) {
